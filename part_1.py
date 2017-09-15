@@ -2,20 +2,33 @@ import csv
 import random
 
 
+# function append input data to list "limit_index" times
+# if input data is prefixes, then varaible "prefix" is True
+def append_to_list(limit_index, prefix=False):
+    data_list = []
+    for index in range(0, limit_index):
+        line = input()
+        if prefix:
+            data_list.append(line.strip())
+        else:
+            data_list.append(line.strip().split())
+    return data_list
+
+
+# function puts firsr "number_of_words" words into raw_data list
+# and next "number_of_prefixes" prefixes puts into prefixes list
 def get_input_data():
-    n = int(input())
-    raw_data = []
-    prefixes = []
-    for index in range(0, n):
-        line = input()
-        raw_data.append(line.strip().split())
-    m = int(input())
-    for index in range(0, m):
-        line = input()
-        prefixes.append(line.strip())
+    number_of_words = int(input())
+    raw_data = append_to_list(number_of_words)
+    number_of_prefixes = int(input())
+    prefixes = append_to_list(number_of_prefixes, prefix=True)
     return raw_data, prefixes
 
 
+# function takes input_data, which contain "raw_data" list and "prefixes" list
+# from the "raw_data" list two dictionaries are created for a word from one letter
+# and for a word from several letters
+# "prefixes" does not change
 def get_dict_trie(input_data):
     freq_dict = {}
     freq_dict_one = {}
@@ -24,8 +37,6 @@ def get_dict_trie(input_data):
             if raw_data[0][0] in freq_dict.keys():
                 if raw_data[0][0:2] in freq_dict[raw_data[0][0]].keys():
                     freq_dict[raw_data[0][0]][raw_data[0][0:2]][raw_data[0]] = raw_data[1]
-                else:
-                    freq_dict[raw_data[0][0]][raw_data[0][0:2]] = {raw_data[0]: raw_data[1]}
             else:
                 freq_dict[raw_data[0][0]] = {raw_data[0][0:2]: {raw_data[0]: raw_data[1]}}
         if raw_data[0][0] in freq_dict_one.keys():
@@ -35,6 +46,9 @@ def get_dict_trie(input_data):
     return [freq_dict, freq_dict_one], input_data[1]
 
 
+# function takes input_data, which contain list of dictionaries and "prefixes" list
+# for each prefix from "prefixes" list function searching and then printing
+# top 10 most used words and their frequency of repetition
 def suggest_options(input_data):
     dict_trie = input_data[0]
     prefixes = input_data[1]
@@ -54,14 +68,13 @@ def suggest_options(input_data):
                 if prefix == letter:
                     for word, freq in dict_trie[1][letter].items():
                         list_of_options.append((word, int(freq)))
-        list_of_options.sort(key=lambda word_info: word_info[1], reverse=True)
+        list_of_options.sort(key=lambda word_info: (word_info[1], word_info[0]), reverse=True)
         suggest_options_dict[prefix] = list_of_options[:10]
     for top_words in suggest_options_dict.values():
         for words in top_words:
-            print(words[0], words[1])
+            print(words[0])
         print('\n')
 
 
 if __name__ == '__main__':
     suggest_options(get_dict_trie(get_input_data()))
-    # print(get_input_data())
