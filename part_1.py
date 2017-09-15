@@ -49,7 +49,7 @@ def get_dict_trie(input_data):
 # function takes input_data, which contain list of dictionaries and "prefixes" list
 # for each prefix from "prefixes" list function searching and then printing
 # top 10 most used words and their frequency of repetition
-def suggest_options(input_data):
+def print_suggest_options(input_data):
     dict_trie = input_data[0]
     prefixes = input_data[1]
     for prefix in prefixes:
@@ -69,13 +69,13 @@ def suggest_options(input_data):
                         list_of_options.append((word, int(freq)*-1))
         list_of_options.sort(key=lambda word_info: (word_info[1], word_info[0]))
         if len(list_of_options) > 10:
-            for index in range(0, 10):
-                print(list_of_options[index][0])
+            last_index = 10
         else:
-            for index in range(0, len(list_of_options)):
-                print(list_of_options[index][0])
+            last_index = len(list_of_options)
+        for index in range(0, last_index):
+            print(list_of_options[index][0])
         print('\n')
 
 
 if __name__ == '__main__':
-    suggest_options(get_dict_trie(get_input_data()))
+    print_suggest_options(get_dict_trie(get_input_data()))
