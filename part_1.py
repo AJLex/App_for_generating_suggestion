@@ -52,7 +52,6 @@ def get_dict_trie(input_data):
 def suggest_options(input_data):
     dict_trie = input_data[0]
     prefixes = input_data[1]
-    suggest_options_dict = {}
     for prefix in prefixes:
         list_of_options = []
         if len(prefix) > 1:
@@ -62,17 +61,19 @@ def suggest_options(input_data):
                         if prefix[0:2] == letters:
                             for word, freq in dict_trie[0][letter][letters].items():
                                 if prefix == word[:len(prefix)]:
-                                    list_of_options.append((word, int(freq)))
+                                    list_of_options.append((word, int(freq)*-1))
         else:
             for letter in dict_trie[1].keys():
                 if prefix == letter:
                     for word, freq in dict_trie[1][letter].items():
-                        list_of_options.append((word, int(freq)))
-        list_of_options.sort(key=lambda word_info: (word_info[1], word_info[0]), reverse=True)
-        suggest_options_dict[prefix] = list_of_options[:10]
-    for top_words in suggest_options_dict.values():
-        for words in top_words:
-            print(words[0])
+                        list_of_options.append((word, int(freq)*-1))
+        list_of_options.sort(key=lambda word_info: (word_info[1], word_info[0]))
+        if len(list_of_options) > 10:
+            for index in range(0, 10):
+                print(list_of_options[index][0])
+        else:
+            for index in range(0, len(list_of_options)):
+                print(list_of_options[index][0])
         print('\n')
 
 
