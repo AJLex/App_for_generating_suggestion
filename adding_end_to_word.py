@@ -8,6 +8,8 @@ function reads dictionary and takes column 'Lemma' and 'Doc'
 return dict where key is a word from 'Lemma' and value is a freq from 'Doc',
 list of prefixes(like 'прив', 'аб', 'эконо') with a different lengths
 """
+
+
 def get_input_data(filename):
     with open(filename, 'r', encoding='utf-8') as f:
         fields = ['word', 'PoS', 'Freq', 'R', 'D', 'Doc']
@@ -17,12 +19,14 @@ def get_input_data(filename):
         for raw in reader:
             raw_data = [raw.get('word').lower(), raw.get('Doc')]
             rus_freq_dict[raw_data[0]] = raw_data[1]
+            rus_freq_dict[raw_data[0] + random.choice("абвгде")] = \
+                raw_data[1] + str(random.randint(0, 20))
             if len(raw_data[0]) > 2:
                 max_len = len(raw_data[0]) - 1
             else:
                 max_len = len(raw_data[0])
             prefixes.append(raw_data[0][:random.randint(1, max_len)])
-    return rus_freq_dict, prefixes[:10000]
+    return rus_freq_dict, prefixes
 
 
 def suggest_options(input_data):
@@ -41,10 +45,10 @@ def suggest_options(input_data):
                 left_limit = middle + 1
             else:
                 right_limit = middle
-        # print(prefix, words[left_limit])
         for index in range(left_limit, len(words)):
             if prefix == words[index][:len(prefix)]:
-                list_of_options.append((words[index], input_data[0].get(words[index])))
+                list_of_options.append((words[index],
+                                        input_data[0].get(words[index])))
             else:
                 break
         suggest_options_dict[prefix] = list_of_options[:10]
@@ -53,4 +57,3 @@ def suggest_options(input_data):
 
 if __name__ == '__main__':
     suggest_options(get_input_data('freqrnc2011.csv'))
-    # print(get_input_data('freqrnc2011.csv'))
