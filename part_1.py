@@ -6,7 +6,7 @@ from collections import defaultdict
 # if input data is prefixes, then varaible "prefix" is True
 def append_to_list(max_line, prefix=False):
     data_list = []
-    for index in range(0, max_line):
+    for index in range(max_line):
         line = input()
         if prefix:
             data_list.append(line.strip())
@@ -30,14 +30,11 @@ def get_input_data():
 # and for a word from several letters
 # "prefixes" does not change
 def get_dict_trie(input_data):
-    freq_dict = defaultdict(dict)
+    freq_dict = defaultdict(lambda: defaultdict(dict))
     freq_dict_one = defaultdict(dict)
     for raw_data in input_data[0]:
         if len(raw_data[0]) > 1:
-            if raw_data[0][0:2] in freq_dict[raw_data[0][0]]:
-                freq_dict[raw_data[0][0]][raw_data[0][0:2]][raw_data[0]] = raw_data[1]
-            else:
-                freq_dict[raw_data[0][0]][raw_data[0][0:2]] = {raw_data[0]: raw_data[1]}
+            freq_dict[raw_data[0][0]][raw_data[0][:2]][raw_data[0]] = raw_data[1]
         freq_dict_one[raw_data[0][0]][raw_data[0]] = raw_data[1]
     return [freq_dict, freq_dict_one], input_data[1]
 
@@ -51,20 +48,15 @@ def print_suggest_options(input_data):
     for prefix in prefixes:
         list_of_options = []
         if len(prefix) > 1:
-            for letter in dict_trie[0].keys():
-                if prefix[0] == letter:
-                    for letters in dict_trie[0][letter].keys():
-                        if prefix[0:2] == letters:
-                            for word, freq in dict_trie[0][letter][letters].items():
-                                if prefix == word[:len(prefix)]:
-                                    list_of_options.append((word, int(freq)*-1))
+            for word, freq in dict_trie[0][prefix[:1]][prefix[:2]].items():
+                if prefix == word[:len(prefix)]:
+                    list_of_options.append((word, int(freq)*-1))
         else:
-            for letter in dict_trie[1].keys():
-                if prefix == letter:
-                    for word, freq in dict_trie[1][letter].items():
-                        list_of_options.append((word, int(freq)*-1))
+            for word, freq in dict_trie[1][prefix[:1]].items():
+                if prefix == word[:len(prefix)]:
+                    list_of_options.append((word, int(freq)*-1))
         list_of_options.sort(key=lambda word_info: (word_info[1], word_info[0]))
-        for word_info in list_of_options[:min(10, len(list_of_options))]:
+        for word_info in list_of_options[:10]:
             print(word_info[0])
         print('\n')
 
