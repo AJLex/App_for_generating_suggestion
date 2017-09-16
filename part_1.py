@@ -74,4 +74,3 @@ def suggest_options(input_data, printing_option=True):
 
 if __name__ == '__main__':
     suggest_options(get_dict_trie_like(get_input_data()))
-    # get_data_from_file(input())
