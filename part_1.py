@@ -1,12 +1,12 @@
-import csv
 import random
+from collections import defaultdict
 
 
 # function append input data to list "limit_index" times
 # if input data is prefixes, then varaible "prefix" is True
-def append_to_list(limit_index, prefix=False):
+def append_to_list(max_line, prefix=False):
     data_list = []
-    for index in range(0, limit_index):
+    for index in range(0, max_line):
         line = input()
         if prefix:
             data_list.append(line.strip())
@@ -30,19 +30,15 @@ def get_input_data():
 # and for a word from several letters
 # "prefixes" does not change
 def get_dict_trie(input_data):
-    freq_dict = {}
-    freq_dict_one = {}
+    freq_dict = defaultdict(dict)
+    freq_dict_one = defaultdict(dict)
     for raw_data in input_data[0]:
         if len(raw_data[0]) > 1:
-            if raw_data[0][0] in freq_dict.keys():
-                if raw_data[0][0:2] in freq_dict[raw_data[0][0]].keys():
-                    freq_dict[raw_data[0][0]][raw_data[0][0:2]][raw_data[0]] = raw_data[1]
+            if raw_data[0][0:2] in freq_dict[raw_data[0][0]]:
+                freq_dict[raw_data[0][0]][raw_data[0][0:2]][raw_data[0]] = raw_data[1]
             else:
-                freq_dict[raw_data[0][0]] = {raw_data[0][0:2]: {raw_data[0]: raw_data[1]}}
-        if raw_data[0][0] in freq_dict_one.keys():
-            freq_dict_one[raw_data[0][0]][raw_data[0]] = raw_data[1]
-        else:
-            freq_dict_one[raw_data[0][0]] = {raw_data[0]: raw_data[1]}
+                freq_dict[raw_data[0][0]][raw_data[0][0:2]] = {raw_data[0]: raw_data[1]}
+        freq_dict_one[raw_data[0][0]][raw_data[0]] = raw_data[1]
     return [freq_dict, freq_dict_one], input_data[1]
 
 
@@ -68,12 +64,8 @@ def print_suggest_options(input_data):
                     for word, freq in dict_trie[1][letter].items():
                         list_of_options.append((word, int(freq)*-1))
         list_of_options.sort(key=lambda word_info: (word_info[1], word_info[0]))
-        if len(list_of_options) > 10:
-            last_index = 10
-        else:
-            last_index = len(list_of_options)
-        for index in range(0, last_index):
-            print(list_of_options[index][0])
+        for word_info in list_of_options[:min(10, len(list_of_options))]:
+            print(word_info[0])
         print('\n')
 
 
