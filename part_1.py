@@ -1,27 +1,19 @@
-import random
 from collections import defaultdict
-
-
-# function append input data to list "limit_index" times
-# if input data is prefixes, then varaible "prefix" is True
-def append_to_list(max_line, prefix=False):
-    data_list = []
-    for index in range(max_line):
-        line = input()
-        if prefix:
-            data_list.append(line.strip())
-        else:
-            data_list.append(line.strip().split())
-    return data_list
 
 
 # function puts firsr "number_of_words" words into raw_data list
 # and next "number_of_prefixes" prefixes puts into prefixes list
 def get_input_data():
+    raw_data = []
+    prefixes = []
     number_of_words = int(input())
-    raw_data = append_to_list(number_of_words)
+    for index in range(number_of_words):
+        line = input()
+        raw_data.append(line.strip().split())
     number_of_prefixes = int(input())
-    prefixes = append_to_list(number_of_prefixes, prefix=True)
+    for index in range(number_of_prefixes):
+        line = input()
+        prefixes.append(line.strip())
     return raw_data, prefixes
 
 
