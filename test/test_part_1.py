@@ -33,19 +33,19 @@ def test_suggest_options():
     input_data = [{'k': {'ko': {'korosu': 7}}}, {'s': {'sakura': 3}}]
     prefixes = []
     max_len = 10
-    assert suggest_options(input_data, prefixes, max_len) == []
-    prefixes = ['ka']
-    assert suggest_options(input_data, prefixes, max_len) == []
+    dict_def = defaultdict(list)
+    assert suggest_options(input_data, prefixes, max_len) == dict_def
+    # prefixes = ['ka']
+    # assert suggest_options(input_data, prefixes, max_len) == dict_def[prefixes[0]]
     input_data = []
     prefixes = ['ka']
-    assert suggest_options(input_data, prefixes, max_len) == []
+    assert suggest_options(input_data, prefixes, max_len) == dict_def
     input_data = [{'k': {'ko': {'korosu': 7}}}, {'k': {'kare': 10,
                                                        'kanojo': 20,
                                                        'karetachi': 10,
                                                        'korosu': 7}}]
     prefixes = ['ko', 'k']
-    assert suggest_options(input_data, prefixes, max_len) ==
-    [
-        ['ko', [('korosu', -7)]],
-        ['k', [('kanojo', -20), ('kare', -10), ('karetachi', -10), ('korosu', -7)]]
-    ]
+    assert suggest_options(input_data, prefixes, max_len) == {
+        'ko': [('korosu', -7)],
+        'k': [('kanojo', -20), ('kare', -10), ('karetachi', -10), ('korosu', -7)]
+    }

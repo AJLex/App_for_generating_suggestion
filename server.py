@@ -20,7 +20,7 @@ def setup_server(port):
 def preparing_server(path_to_file, sock):
     try:  # if wrong path to file - exit
         # prepare dictionary
-        dict_trie = get_dict_trie_like(get_data_from_file(path_to_file))
+        dict_trie = get_freq_dicts(get_data_from_file(path_to_file))
     except:
         print('Не верно указан путь к файлу или ошибка файла.')
         sys.exit()

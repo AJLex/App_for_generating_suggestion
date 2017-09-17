@@ -1,7 +1,8 @@
 from collections import defaultdict
 
 
-# Function reads a file from given path and makes list
+# Function reads a file from given path, format: words freq,
+# and makes list with words and their freq
 def get_data_from_file(path_to_file):
     raw_data = []
     with open(path_to_file, 'r', encoding='utf-8') as f:
@@ -11,7 +12,7 @@ def get_data_from_file(path_to_file):
 
 
 
-# function reads input data, format: words and their frequency, prefixes
+# function сonsistently reads words and their frequency, prefixes
 # and makes fist list with words and their frequency, second - list of prefixes
 def get_input_data():
     raw_data = []
@@ -27,8 +28,9 @@ def get_input_data():
     return raw_data, prefixes
 
 
-# function takes input data and creats kist of 2 dictionaries
-def get_dict_trie_like(input_data):
+# function takes input data from standart input, format: word freq
+# and creats kist of 2 dictionaries for non single words and for single words
+def get_freq_dicts(input_data):
     freq_dict = defaultdict(lambda: defaultdict(dict))
     freq_dict_singl_word = defaultdict(dict)
     for raw_data in input_data:
@@ -40,35 +42,31 @@ def get_dict_trie_like(input_data):
     return [freq_dict, freq_dict_singl_word]
 
 
-# function takes input data and searching top 10 most used words for given prefix
-def suggest_options(dict_trie, prefixes, max_len):
+# function takes dictionarys with words and their freq, prefixes
+# and searching top 10 most used words for given prefixes
+def suggest_options(freq_dicts, prefixes, max_len):
     cash = defaultdict(list)
     for prefix in prefixes:
-        if prefix not in cash:  # there is no need to seek if prefix already in dict 
-            try:
-                list_of_options = []
-                if len(prefix) > 1:
-                    for word, freq in dict_trie[0][prefix[:1]][prefix[:2]].items():
-                        if prefix == word[:len(prefix)]:
-                            # it's necessary for correct sort
-                            list_of_options.append((word, freq*-1))
-                else:
-                    for word, freq in dict_trie[1][prefix[:1]].items():
-                        if prefix == word[:len(prefix)]:
-                            # it's necessary for correct sort
-                            list_of_options.append((word, freq*-1))
-                list_of_options.sort(key=lambda word_info: (word_info[1], word_info[0]))
-                cash[prefix] = list_of_options[:max_len]
-            except KeyError:
-                print('Нет такого префикса')
-            except IndexError:
-                print('Пустой словарь')
+        if prefix not in cash:  # there is no need to seek if prefix already in dict
+            list_of_options = []
+            if len(prefix) > 1:
+                for word, freq in freq_dicts[0][prefix[:1]][prefix[:2]].items():
+                    if word.startswith(prefix):
+                        # *-1 is necessary for correct sort
+                        list_of_options.append((word, freq*-1))
+            else:
+                for word, freq in freq_dicts[1][prefix[:1]].items():
+                    if word.startswith(prefix):
+                        # *-1 is necessary for correct sort
+                        list_of_options.append((word, freq*-1))
+            list_of_options.sort(key=lambda word_info: (word_info[1], word_info[0]))
+            cash[prefix] = list_of_options[:max_len]
     return cash
 
 
 if __name__ == '__main__':
     input_data = get_input_data()
-    prefixes_dict = suggest_options(get_dict_trie_like(input_data[0]),
+    prefixes_dict = suggest_options(get_freq_dicts(input_data[0]),
         input_data[1], max_len=10)
     for prefix in input_data[1]:
         for word_info in prefixes_dict[prefix]:
