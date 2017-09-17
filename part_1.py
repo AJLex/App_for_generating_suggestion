@@ -1,7 +1,7 @@
 from collections import defaultdict
 
 
-# Function reads a file from given path and makes two lists
+# Function reads a file from given path and makes list
 def get_data_from_file(path_to_file):
     raw_data = []
     with open(path_to_file, 'r', encoding='utf-8') as f:
@@ -10,8 +10,9 @@ def get_data_from_file(path_to_file):
     return raw_data
 
 
-# function puts firsr "number_of_words" words into raw_data list
-# and next "number_of_prefixes" prefixes puts into prefixes list
+
+# function reads input data, format: words and their frequency, prefixes
+# and makes fist list with words and their frequency, second - list of prefixes
 def get_input_data():
     raw_data = []
     prefixes = []
@@ -26,10 +27,7 @@ def get_input_data():
     return raw_data, prefixes
 
 
-# function takes input_data, which contain "raw_data" list and "prefixes" list
-# from the "raw_data" list two dictionaries are created for a word from one letter
-# and for a word from several letters
-# "prefixes" does not change
+# function takes input data and creats kist of 2 dictionaries
 def get_dict_trie_like(input_data):
     freq_dict = defaultdict(lambda: defaultdict(dict))
     freq_dict_singl_word = defaultdict(dict)
@@ -42,36 +40,37 @@ def get_dict_trie_like(input_data):
     return [freq_dict, freq_dict_singl_word]
 
 
-# function takes input_data, which contain list of dictionaries and "prefixes" list
-# for each prefix from "prefixes" list function searching and then printing
-# top 10 most used words and their frequency of repetition
+# function takes input data and searching top 10 most used words for given prefix
 def suggest_options(dict_trie, prefixes, max_len):
-    prefixes_list = []
+    cash = defaultdict(list)
     for prefix in prefixes:
-        try:
-            list_of_options = []
-            if len(prefix) > 1:
-                for word, freq in dict_trie[0][prefix[:1]][prefix[:2]].items():
-                    if prefix == word[:len(prefix)]:
-                        list_of_options.append((word, freq*-1))
-            else:
-                for word, freq in dict_trie[1][prefix[:1]].items():
-                    if prefix == word[:len(prefix)]:
-                        list_of_options.append((word, freq*-1))
-            list_of_options.sort(key=lambda word_info: (word_info[1], word_info[0]))
-            prefixes_list.append([prefix, list_of_options[:10]])
-        except KeyError:
-            print('Нет такого префикса')
-        except IndexError:
-            print('Пустой словарь')
-    return prefixes_list
+        if prefix not in cash:  # there is no need to seek if prefix already in dict 
+            try:
+                list_of_options = []
+                if len(prefix) > 1:
+                    for word, freq in dict_trie[0][prefix[:1]][prefix[:2]].items():
+                        if prefix == word[:len(prefix)]:
+                            # it's necessary for correct sort
+                            list_of_options.append((word, freq*-1))
+                else:
+                    for word, freq in dict_trie[1][prefix[:1]].items():
+                        if prefix == word[:len(prefix)]:
+                            # it's necessary for correct sort
+                            list_of_options.append((word, freq*-1))
+                list_of_options.sort(key=lambda word_info: (word_info[1], word_info[0]))
+                cash[prefix] = list_of_options[:max_len]
+            except KeyError:
+                print('Нет такого префикса')
+            except IndexError:
+                print('Пустой словарь')
+    return cash
 
 
 if __name__ == '__main__':
     input_data = get_input_data()
-    prefixes_list = suggest_options(get_dict_trie_like(input_data[0]),
+    prefixes_dict = suggest_options(get_dict_trie_like(input_data[0]),
         input_data[1], max_len=10)
-    for prefix_info in prefixes_list:
-        for word_info in prefix_info[1]:
-            print(word_info[0])
+    for prefix in input_data[1]:
+        for word_info in prefixes_dict[prefix]:
+                print(word_info[0])
         print('\n')
