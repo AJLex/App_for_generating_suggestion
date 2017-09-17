@@ -14,6 +14,8 @@ def get_data_from_server(sock):
     print('Enter "exit" for exit.')
     while True:
         data = input("> ")
+        if data == '':  # protection from entering empty string
+            sock.send(bytes('empty', encoding='utf-8'))
         sock.send(bytes(data, encoding='utf-8'))
         if data == 'exit':  # if client wants to disconnect, hi enter "exit"
             break

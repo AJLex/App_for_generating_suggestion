@@ -1,4 +1,5 @@
 import socket
+import sys
 
 
 from part_1 import get_data_from_file,  get_dict_trie_like, suggest_options
@@ -16,7 +17,11 @@ def setup_server(port):
 
 # Function prepares server for client request processing
 def preparing_server(path_to_file, sock):
-    dict_trie = get_dict_trie_like(get_data_from_file(path_to_file))  # prepare dictionary
+    try:  # if wrong path to file - exit
+        dict_trie = get_dict_trie_like(get_data_from_file(path_to_file))  # prepare dictionary
+    except:
+        print('Не верно указан путь к файлу или ошибка файла.')
+        sys.exit()
     conn, addr = sock.accept()  # waiting for client connection
     data = conn.recv(1024).decode('utf-8')  # getting message from client, when he connected
     print(data, 'from ', addr[0])
@@ -32,7 +37,7 @@ def client_request_processing(dict_trie, conn, max_len):
         try:
             command, prefix = data.split()
             if command == 'get':
-                prefix = prefix[1: len(prefix) - 1]
+                prefix = prefix[1: len(prefix) - 1]  # delet "<", ">"
                 prefix_options = suggest_options(dict_trie, [prefix], max_len)
                 for word_info in prefix_options[0][1]:
                     conn.send(bytes(word_info[0] + 'end', encoding='utf-8'))  # "end" says to client that all data was obtained
