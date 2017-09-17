@@ -4,15 +4,10 @@ from collections import defaultdict
 # Function reads a file from given path and makes two lists
 def get_data_from_file(path_to_file):
     raw_data = []
-    prefixes = []
     with open(path_to_file, 'r', encoding='utf-8') as f:
-            input_data = f.readlines()
-    number_of_words = int(input_data[0].strip())
-    for index in range(1, number_of_words + 1):
-        raw_data.append(input_data[index].strip().split())
-    for index in range(number_of_words + 2, len(input_data)):
-        prefixes.append(input_data[index].strip())
-    return raw_data, prefixes
+            for line in f:
+                raw_data.append(line.strip().split())
+    return raw_data
 
 
 # function puts firsr "number_of_words" words into raw_data list
@@ -38,20 +33,20 @@ def get_input_data():
 def get_dict_trie_like(input_data):
     freq_dict = defaultdict(lambda: defaultdict(dict))
     freq_dict_singl_word = defaultdict(dict)
-    for raw_data in input_data[0]:
-        if len(raw_data[0]) > 1:
-            freq_dict[raw_data[0][0]][raw_data[0][:2]][raw_data[0]] = raw_data[1]
-        freq_dict_singl_word[raw_data[0][0]][raw_data[0]] = raw_data[1]
-    return [freq_dict, freq_dict_singl_word], input_data[1]
+    for raw_data in input_data:
+        current_word = raw_data[0]
+        word_freq = raw_data[1]
+        if len(current_word) > 1:
+            freq_dict[current_word[0]][current_word[:2]][current_word] = word_freq
+        freq_dict_singl_word[current_word[0]][current_word] = word_freq
+    return [freq_dict, freq_dict_singl_word]
 
 
 # function takes input_data, which contain list of dictionaries and "prefixes" list
 # for each prefix from "prefixes" list function searching and then printing
 # top 10 most used words and their frequency of repetition
-def suggest_options(input_data, printing_option=True):
-    dict_trie = input_data[0]
-    prefixes = input_data[1]
-    prefixes_dict = defaultdict(list)
+def suggest_options(dict_trie, prefixes, max_len):
+    prefixes_list = []
     for prefix in prefixes:
         list_of_options = []
         if len(prefix) > 1:
@@ -63,14 +58,15 @@ def suggest_options(input_data, printing_option=True):
                 if prefix == word[:len(prefix)]:
                     list_of_options.append((word, int(freq)*-1))
         list_of_options.sort(key=lambda word_info: (word_info[1], word_info[0]))
-        if printing_option:
-            for word_info in list_of_options[:10]:
-                print(word_info[0])
-            print('\n')
-        else:
-            prefixes_dict[prefix] = list_of_options[:10]
-    return prefixes_dict
+        prefixes_list.append([prefix, list_of_options[:10]])
+    return prefixes_list
 
 
 if __name__ == '__main__':
-    suggest_options(get_dict_trie_like(get_input_data()))
+    input_data = get_input_data()
+    prefixes_list = suggest_options(get_dict_trie_like(input_data[0]),
+        input_data[1], max_len=10)
+    for prefix_info in prefixes_list:
+        for word_info in prefix_info[1]:
+            print(word_info[0])
+        print('\n')
