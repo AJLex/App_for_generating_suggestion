@@ -1,7 +1,7 @@
-test_input.txt
-binar_search.py
 draft.py
 freqrnc2011.csv
 __init__.py
 /__pycache__
 input.txt
+.cache/
+/test/__pycache__

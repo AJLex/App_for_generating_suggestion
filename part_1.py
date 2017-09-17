@@ -35,7 +35,7 @@ def get_dict_trie_like(input_data):
     freq_dict_singl_word = defaultdict(dict)
     for raw_data in input_data:
         current_word = raw_data[0]
-        word_freq = raw_data[1]
+        word_freq = int(raw_data[1])
         if len(current_word) > 1:
             freq_dict[current_word[0]][current_word[:2]][current_word] = word_freq
         freq_dict_singl_word[current_word[0]][current_word] = word_freq
@@ -48,17 +48,22 @@ def get_dict_trie_like(input_data):
 def suggest_options(dict_trie, prefixes, max_len):
     prefixes_list = []
     for prefix in prefixes:
-        list_of_options = []
-        if len(prefix) > 1:
-            for word, freq in dict_trie[0][prefix[:1]][prefix[:2]].items():
-                if prefix == word[:len(prefix)]:
-                    list_of_options.append((word, int(freq)*-1))
-        else:
-            for word, freq in dict_trie[1][prefix[:1]].items():
-                if prefix == word[:len(prefix)]:
-                    list_of_options.append((word, int(freq)*-1))
-        list_of_options.sort(key=lambda word_info: (word_info[1], word_info[0]))
-        prefixes_list.append([prefix, list_of_options[:10]])
+        try:
+            list_of_options = []
+            if len(prefix) > 1:
+                for word, freq in dict_trie[0][prefix[:1]][prefix[:2]].items():
+                    if prefix == word[:len(prefix)]:
+                        list_of_options.append((word, freq*-1))
+            else:
+                for word, freq in dict_trie[1][prefix[:1]].items():
+                    if prefix == word[:len(prefix)]:
+                        list_of_options.append((word, freq*-1))
+            list_of_options.sort(key=lambda word_info: (word_info[1], word_info[0]))
+            prefixes_list.append([prefix, list_of_options[:10]])
+        except KeyError:
+            print('Нет такого префикса')
+        except IndexError:
+            print('Пустой словарь')
     return prefixes_list
 
 

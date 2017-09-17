@@ -10,16 +10,16 @@ def setup_server(port):
     host = ''
     server_adress = (host, port)
     sock.bind(server_adress)
-    sock.listen(1) # client queue length
+    sock.listen(1)  # client queue length
     return sock
 
 
 # Function prepares server for client request processing
 def preparing_server(path_to_file, sock):
-    dict_trie = get_dict_trie_like(get_data_from_file(path_to_file)) # prepare dictionary
+    dict_trie = get_dict_trie_like(get_data_from_file(path_to_file))  # prepare dictionary
     conn, addr = sock.accept()  # waiting for client connection
     data = conn.recv(1024).decode('utf-8')  # getting message from client, when he connected
-    print(data,'from ', addr[0])
+    print(data, 'from ', addr[0])
     return dict_trie, conn
 
 
