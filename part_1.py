@@ -12,7 +12,15 @@ def get_data_from_file(path_to_file):
 
 
 
-# function сonsistently reads words and their frequency, prefixes
+# function сonsistently from standart input reads data, format:
+# N - number of words
+# word freq
+# .....
+# N lines
+# M - number of prefixes
+# prefix
+# ...
+# M lines
 # and makes fist list with words and their frequency, second - list of prefixes
 def get_input_data():
     raw_data = []
@@ -28,40 +36,41 @@ def get_input_data():
     return raw_data, prefixes
 
 
-# function takes input data from standart input, format: word freq
-# and creats kist of 2 dictionaries for non single words and for single words
+# function takes input data , format: word freq
+# and creats list of 2 dictionaries: for non single words and
+# dictionary with 10 most used words for each initial letter of the input dictionary
 def get_freq_dicts(input_data):
     freq_dict = defaultdict(lambda: defaultdict(dict))
-    freq_dict_singl_word = defaultdict(dict)
+    cache = defaultdict(list)
     for raw_data in input_data:
         current_word = raw_data[0]
         word_freq = int(raw_data[1])
         if len(current_word) > 1:
             freq_dict[current_word[0]][current_word[:2]][current_word] = word_freq
-        freq_dict_singl_word[current_word[0]][current_word] = word_freq
-    return [freq_dict, freq_dict_singl_word]
+        cache[current_word[0]].append((current_word, -word_freq))
+    for single_word, word_info in cache.items():
+        word_info.sort(key=lambda word_info: (word_info[1], word_info[0]))
+        cache[single_word] = word_info[:10]
+    return [freq_dict, cache]
 
 
 # function takes dictionarys with words and their freq, prefixes
 # and searching top 10 most used words for given prefixes
-def suggest_options(freq_dicts, prefixes, max_len):
-    cash = defaultdict(list)
+def suggest_options(input_data, prefixes, max_len):
+    cache = input_data[1]
     for prefix in prefixes:
-        if prefix not in cash:  # there is no need to seek if prefix already in dict
+        # there is no need to seek if prefix already in dict
+        if prefix not in cache:
             list_of_options = []
             if len(prefix) > 1:
-                for word, freq in freq_dicts[0][prefix[:1]][prefix[:2]].items():
+                for word, freq in input_data[0][prefix[:1]][prefix[:2]].items():
                     if word.startswith(prefix):
-                        # *-1 is necessary for correct sort
-                        list_of_options.append((word, freq*-1))
-            else:
-                for word, freq in freq_dicts[1][prefix[:1]].items():
-                    if word.startswith(prefix):
-                        # *-1 is necessary for correct sort
-                        list_of_options.append((word, freq*-1))
+                        # *- is necessary for correct sort
+                        # first by freq then by lexicographical order
+                        list_of_options.append((word, -freq))
             list_of_options.sort(key=lambda word_info: (word_info[1], word_info[0]))
-            cash[prefix] = list_of_options[:max_len]
-    return cash
+            cache[prefix] = list_of_options[:max_len]
+    return cache
 
 
 if __name__ == '__main__':
