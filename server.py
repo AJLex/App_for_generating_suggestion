@@ -33,7 +33,7 @@ def client_request_processing(path_to_file, conn, max_len):
             if command == 'get':
                 prefix = prefix[1: len(prefix) - 1]  # delet "<", ">"
                 for word_info in suggestions_generator.generate_suggestions(prefix):
-                    # "end" says to client that all data was obtained
+                    # " " says to client that all data was obtained
                     conn.send(bytes(word_info[0] + ' ', encoding='utf-8'))
                     # server gets answer from client, when client gets all data
                     conn.recv(1024).decode('utf-8')

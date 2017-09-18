@@ -22,7 +22,7 @@ def get_data_from_server(sock):
             break
         while True:
             word = sock.recv(2048).decode('utf-8')
-            # server sends "word + end", "end" - means that all message was sended
+            # server sends "word" + " ", " " - means that all message was sended
             if word[-1] == ' ':
                 print(word[:-1])
                 # client sends message to serve, when gets all data
