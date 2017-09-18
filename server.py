@@ -19,7 +19,7 @@ def setup_server(port):
 # Function processing client request
 def client_request_processing(path_to_file, conn, max_len):
     try:  # if wrong path to file - exit
-        dictionary = get_input_data_from_file(path_to_file)[0]  # prepare dictionary
+        dictionary = get_input_data_from_file(path_to_file)  # prepare dictionary
     except:
         print('Не верно указан путь к файлу или ошибка файла.')
         sys.exit()
@@ -51,6 +51,5 @@ if __name__ == "__main__":
     # getting message from client, when he connected
     data = conn.recv(1024).decode('utf-8')
     print(data, 'from ', addr[0])
-    # freq_dict, cache, conn = preparing_server(path_to_file, sock)
     client_request_processing(path_to_file, conn, max_len=10)
     conn.close()

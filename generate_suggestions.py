@@ -4,17 +4,13 @@ from collections import defaultdict
 # Function reads a file from given path, format: see get_input_data(),
 # and returns dictionary and list of prefixes
 def get_input_data_from_file(path_to_file):
-    raw_data = []
     dictionary = []
     with open(path_to_file, 'r', encoding='utf-8') as f:
             for line in f:
                 items = line.strip().split()
                 if len(items) > 1:
                     dictionary.append((items[0], int(items[1])))
-                else:
-                    raw_data.append(items[0])
-                prefixes = raw_data[2:]
-    return dictionary, prefixes
+    return dictionary
 
 
 # function reads input data from stdin,
@@ -45,7 +41,11 @@ def get_input_data():
     return dictionary, prefixes
 
 
+#
 class SuggestionGenerator():
+    """
+    SuggestionGenerator suggests a top 10 most used word for incoming prefix.
+    """
     def __init__(self, dictionary, max_len=10):
         self.shards = defaultdict(lambda: defaultdict(dict))
         self.cache = defaultdict(list)
@@ -55,22 +55,26 @@ class SuggestionGenerator():
                 # first by freq in descending order then by lexicographical order
                 self.shards[word[0]][word[1:2]][word] = -freq
             self.cache[word[0]].append((word, -freq))
-        for single_word, word_info in self.cache.items():
+        for single_letter_word, word_info in self.cache.items():
             word_info.sort(key=lambda word_info: (word_info[1], word_info[0]))
-            self.cache[single_word] = word_info[:max_len]
+            self.cache[single_letter_word] = word_info[:max_len]
+        top_overall = []
+        for single_letter_word, word_info in self.cache.items():
+            top_overall.extend(word_info)
+        top_overall.sort(key=lambda word_info: (word_info[1], word_info[0]))
+        self.cache[''] = top_overall[:10]
 
     def generate_suggestions(self, prefix, max_len=10):
         # there is no need to seek if prefix already in dict
         if prefix in self.cache:
             return self.cache[prefix]
         suggestions = []
-        if len(prefix) > 1:
-            if prefix:
-                if prefix[:1] in self.shards and \
-                   prefix[1:2] in self.shards[prefix[:1]]:
-                    for word, freq in self.shards[prefix[:1]][prefix[1:2]].items():
-                        if word.startswith(prefix):
-                            suggestions.append((word, freq))
+        if prefix[:1] not in self.shards or \
+           prefix[1:2] not in self.shards[prefix[:1]]:
+            return []
+        for word, freq in self.shards[prefix[:1]][prefix[1:2]].items():
+            if word.startswith(prefix):
+                suggestions.append((word, freq))
         suggestions.sort(key=lambda word_info: (word_info[1], word_info[0]))
         self.cache[prefix] = suggestions[:max_len]
         return self.cache[prefix]
