@@ -13,7 +13,7 @@ for run server.py needs input port and path_to_dictionary
 ```bash
 path_to_program\python server.py 5000 path_to_dictionary\input_data.txt
 ```
-or run client needs input hostname or IP and port, for example:
+for run client needs input hostname or IP and port, for example:
 ```bash
 path_to_program\python client.py localhost 5000
 ```
