@@ -1,85 +1,87 @@
 from collections import defaultdict
 
 
-# Function reads a file from given path, format: words freq,
-# and makes list with words and their freq
-def get_data_from_file(path_to_file):
+# Function reads a file from given path, format: see get_input_data(),
+# and returns dictionary and list of prefixes
+def get_input_data_from_file(path_to_file):
     raw_data = []
+    dictionary =[]
     with open(path_to_file, 'r', encoding='utf-8') as f:
             for line in f:
-                raw_data.append(line.strip().split())
-    return raw_data
+                items = line.strip().split()
+                if len(items) > 1:
+                    dictionary.append((items[0], int(items[1])))
+                else:
+                    raw_data.append(items[0])    
+    prefixes = raw_data[2:]
+    return dictionary, prefixes
 
 
-
-# function сonsistently from standart input reads data, format:
+# function reads input data from stdin,
+# in following format:
 # N - number of words
 # word freq
-# .....
+# ...
 # N lines
+# ...
 # M - number of prefixes
 # prefix
 # ...
 # M lines
-# and makes fist list with words and their frequency, second - list of prefixes
+# ...
+# and returns dictionary and list of prefixes
 def get_input_data():
-    raw_data = []
+    dictionary = []
     prefixes = []
     number_of_words = int(input())
     for index in range(number_of_words):
         line = input()
-        raw_data.append(line.strip().split())
+        items = line.strip().split()
+        dictionary.append((items[0], int(items[1])))
     number_of_prefixes = int(input())
     for index in range(number_of_prefixes):
         line = input()
         prefixes.append(line.strip())
-    return raw_data, prefixes
+    return dictionary, prefixes
 
 
-# function takes input data , format: word freq
-# and creats of 2 dictionaries: for non single words and
-# dictionary with 10 most used words for each initial letter of the input dictionary
-def get_freq_dicts(input_data):
-    freq_dict = defaultdict(lambda: defaultdict(dict))
-    cache = defaultdict(list)
-    for raw_data in input_data:
-        current_word = raw_data[0]
-        word_freq = int(raw_data[1])
-        if len(current_word) > 1:
-            # "-word_freq" is necessary for correct sort
-            # first by freq then by lexicographical order
-            freq_dict[current_word[0]][current_word[1:2]][current_word] = -word_freq
-        cache[current_word[0]].append((current_word, -word_freq))
-    for single_word, word_info in cache.items():
-        word_info.sort(key=lambda word_info: (word_info[1], word_info[0]))
-        cache[single_word] = word_info[:10]
-    return freq_dict, cache
+class SuggestionGenerator():
+    """docstring for ."""
+    def __init__(self, dictionary, max_len=10):
+        self.shards = defaultdict(lambda: defaultdict(dict))
+        self.cache = defaultdict(list)
+        for word, freq in dictionary:
+            if len(word) > 1:
+                # "-freq" is necessary for correct sort
+                # first by freq in descending order then by lexicographical order
+                self.shards[word[0]][word[1:2]][word] = -freq
+            self.cache[word[0]].append((word, -freq))
+        for single_word, word_info in self.cache.items():
+            word_info.sort(key=lambda word_info: (word_info[1], word_info[0]))
+            self.cache[single_word] = word_info[:max_len]
 
 
-# function takes dictionarys with words and their freq, prefixes
-# and searching top 10 most used words for given prefixes
-def suggest_options(freq_dict, cache, prefixes, max_len):
-    for prefix in prefixes:
+    def generate_suggestions(self, prefix, max_len=10):
         # there is no need to seek if prefix already in dict
-        if prefix not in cache:
-            list_of_options = []
-            if len(prefix) > 1:
-                if prefix:
-                    if prefix[:1] in freq_dict and \
-                       prefix[1:2] in freq_dict[prefix[:1]]:
-                        for word, freq in freq_dict[prefix[:1]][prefix[1:2]].items():
-                            if word.startswith(prefix):
-                                list_of_options.append((word, freq))
-            list_of_options.sort(key=lambda word_info: (word_info[1], word_info[0]))
-            cache[prefix] = list_of_options[:max_len]
-    return cache
+        if prefix in self.cache:
+            return self.cache[prefix]
+        suggestions = []
+        if len(prefix) > 1:
+            if prefix:
+                if prefix[:1] in self.shards and \
+                   prefix[1:2] in self.shards[prefix[:1]]:
+                    for word, freq in self.shards[prefix[:1]][prefix[1:2]].items():
+                        if word.startswith(prefix):
+                            suggestions.append((word, freq))
+        suggestions.sort(key=lambda word_info: (word_info[1], word_info[0]))
+        self.cache[prefix] = suggestions[:max_len]
+        return self.cache[prefix]
 
 
 if __name__ == '__main__':
-    input_data = get_input_data()
-    freq_dict, cache = get_freq_dicts(input_data[0])
-    prefixes_dict = suggest_options(freq_dict, cache, input_data[1], max_len=10)
-    for prefix in input_data[1]:
-        for word_info in prefixes_dict[prefix]:
+    dictionary, prefixes = get_input_data()
+    suggestions_generator = SuggestionGenerator(dictionary)
+    for prefix in prefixes:
+        for word_info in suggestions_generator.generate_suggestions(prefix):
                 print(word_info[0])
-        print('\n')
+        print('')

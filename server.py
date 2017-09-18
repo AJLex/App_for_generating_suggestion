@@ -2,7 +2,7 @@ import socket
 import sys
 
 
-from generate_suggestions import get_data_from_file,  get_freq_dicts, suggest_options
+from generate_suggestions import get_input_data_from_file,  SuggestionGenerator
 
 
 # Function configures the server
@@ -16,23 +16,14 @@ def setup_server(port):
     return sock
 
 
-# Function prepares server for client request processing
-def preparing_server(path_to_file, sock):
+# Function processing client request
+def client_request_processing(path_to_file, conn, max_len):
     try:  # if wrong path to file - exit
-        # prepare dictionary
-        freq_dict, cache = get_freq_dicts(get_data_from_file(path_to_file))
+        dictionary = get_input_data_from_file(path_to_file)[0]  # prepare dictionary
     except:
         print('Не верно указан путь к файлу или ошибка файла.')
         sys.exit()
-    conn, addr = sock.accept()  # waiting for client connection
-    # getting message from client, when he connected
-    data = conn.recv(1024).decode('utf-8')
-    print(data, 'from ', addr[0])
-    return freq_dict, cache, conn
-
-
-# Function processing client request
-def client_request_processing(freq_dict, cache, conn, max_len):
+    suggestions_generator = SuggestionGenerator(dictionary)
     while True:
         data = conn.recv(1024).decode('utf-8')
         if data == 'exit':  # if client sends "exit", server turns off
@@ -41,8 +32,7 @@ def client_request_processing(freq_dict, cache, conn, max_len):
             command, prefix = data.split()
             if command == 'get':
                 prefix = prefix[1: len(prefix) - 1]  # delet "<", ">"
-                cache = suggest_options(freq_dict, cache, [prefix], max_len)                
-                for word_info in cache[prefix]:
+                for word_info in suggestions_generator.generate_suggestions(prefix):
                     # "end" says to client that all data was obtained
                     conn.send(bytes(word_info[0] + 'end', encoding='utf-8'))
                     # server gets answer from client, when client gets all data
@@ -57,6 +47,10 @@ if __name__ == "__main__":
     port = int(sys.argv[1])
     path_to_file = sys.argv[2]
     sock = setup_server(port)
-    freq_dict, cache, conn = preparing_server(path_to_file, sock)
-    client_request_processing(freq_dict, cache, conn, max_len=10)
+    conn, addr = sock.accept()# waiting for client connection
+    # getting message from client, when he connected
+    data = conn.recv(1024).decode('utf-8')
+    print(data, 'from ', addr[0])
+    # freq_dict, cache, conn = preparing_server(path_to_file, sock)
+    client_request_processing(path_to_file, conn, max_len=10)
     conn.close()
