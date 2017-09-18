@@ -37,7 +37,7 @@ def get_input_data():
 
 
 # function takes input data , format: word freq
-# and creats list of 2 dictionaries: for non single words and
+# and creats of 2 dictionaries: for non single words and
 # dictionary with 10 most used words for each initial letter of the input dictionary
 def get_freq_dicts(input_data):
     freq_dict = defaultdict(lambda: defaultdict(dict))
@@ -46,28 +46,30 @@ def get_freq_dicts(input_data):
         current_word = raw_data[0]
         word_freq = int(raw_data[1])
         if len(current_word) > 1:
-            freq_dict[current_word[0]][current_word[:2]][current_word] = word_freq
+            # "-word_freq" is necessary for correct sort
+            # first by freq then by lexicographical order
+            freq_dict[current_word[0]][current_word[1:2]][current_word] = -word_freq
         cache[current_word[0]].append((current_word, -word_freq))
     for single_word, word_info in cache.items():
         word_info.sort(key=lambda word_info: (word_info[1], word_info[0]))
         cache[single_word] = word_info[:10]
-    return [freq_dict, cache]
+    return freq_dict, cache
 
 
 # function takes dictionarys with words and their freq, prefixes
 # and searching top 10 most used words for given prefixes
-def suggest_options(input_data, prefixes, max_len):
-    cache = input_data[1]
+def suggest_options(freq_dict, cache, prefixes, max_len):
     for prefix in prefixes:
         # there is no need to seek if prefix already in dict
         if prefix not in cache:
             list_of_options = []
             if len(prefix) > 1:
-                for word, freq in input_data[0][prefix[:1]][prefix[:2]].items():
-                    if word.startswith(prefix):
-                        # *- is necessary for correct sort
-                        # first by freq then by lexicographical order
-                        list_of_options.append((word, -freq))
+                if prefix:
+                    if prefix[:1] in freq_dict and \
+                       prefix[1:2] in freq_dict[prefix[:1]]:
+                        for word, freq in freq_dict[prefix[:1]][prefix[1:2]].items():
+                            if word.startswith(prefix):
+                                list_of_options.append((word, freq))
             list_of_options.sort(key=lambda word_info: (word_info[1], word_info[0]))
             cache[prefix] = list_of_options[:max_len]
     return cache
@@ -75,8 +77,8 @@ def suggest_options(input_data, prefixes, max_len):
 
 if __name__ == '__main__':
     input_data = get_input_data()
-    prefixes_dict = suggest_options(get_freq_dicts(input_data[0]),
-        input_data[1], max_len=10)
+    freq_dict, cache = get_freq_dicts(input_data[0])
+    prefixes_dict = suggest_options(freq_dict, cache, input_data[1], max_len=10)
     for prefix in input_data[1]:
         for word_info in prefixes_dict[prefix]:
                 print(word_info[0])

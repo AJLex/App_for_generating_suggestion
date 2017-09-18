@@ -1,4 +1,5 @@
 import socket
+import sys
 
 
 # Function configures connection parametrs
@@ -30,9 +31,10 @@ def get_data_from_server(sock):
                 print('\n')
                 break
 
+
 if __name__ == '__main__':
-    host = input('Enter hostname:\n> ')
-    server_port = int(input('Enter server port:\n> '))
+    host = sys.argv[1]
+    server_port = int(sys.argv[2])
     sock = setup_connection(host, server_port)
     get_data_from_server(sock)
     sock.close()

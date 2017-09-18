@@ -2,7 +2,7 @@ import socket
 import sys
 
 
-from part_1 import get_data_from_file,  get_dict_trie_like, suggest_options
+from generate_suggestions import get_data_from_file,  get_freq_dicts, suggest_options
 
 
 # Function configures the server
@@ -20,7 +20,7 @@ def setup_server(port):
 def preparing_server(path_to_file, sock):
     try:  # if wrong path to file - exit
         # prepare dictionary
-        dict_trie = get_freq_dicts(get_data_from_file(path_to_file))
+        freq_dict, cache = get_freq_dicts(get_data_from_file(path_to_file))
     except:
         print('Не верно указан путь к файлу или ошибка файла.')
         sys.exit()
@@ -28,11 +28,11 @@ def preparing_server(path_to_file, sock):
     # getting message from client, when he connected
     data = conn.recv(1024).decode('utf-8')
     print(data, 'from ', addr[0])
-    return dict_trie, conn
+    return freq_dict, cache, conn
 
 
 # Function processing client request
-def client_request_processing(dict_trie, conn, max_len):
+def client_request_processing(freq_dict, cache, conn, max_len):
     while True:
         data = conn.recv(1024).decode('utf-8')
         if data == 'exit':  # if client sends "exit", server turns off
@@ -41,8 +41,8 @@ def client_request_processing(dict_trie, conn, max_len):
             command, prefix = data.split()
             if command == 'get':
                 prefix = prefix[1: len(prefix) - 1]  # delet "<", ">"
-                prefix_options = suggest_options(dict_trie, [prefix], max_len)
-                for word_info in prefix_options[0][1]:
+                cache = suggest_options(freq_dict, cache, [prefix], max_len)                
+                for word_info in cache[prefix]:
                     # "end" says to client that all data was obtained
                     conn.send(bytes(word_info[0] + 'end', encoding='utf-8'))
                     # server gets answer from client, when client gets all data
@@ -54,8 +54,9 @@ def client_request_processing(dict_trie, conn, max_len):
 
 
 if __name__ == "__main__":
-    path_to_file = input("Enter path to dictionary:\n> ")
-    sock = setup_server(int(input("Enter port:\n> ")))
-    dict_trie, conn = preparing_server(path_to_file, sock)
-    client_request_processing(dict_trie, conn, max_len=10)
+    port = int(sys.argv[1])
+    path_to_file = sys.argv[2]
+    sock = setup_server(port)
+    freq_dict, cache, conn = preparing_server(path_to_file, sock)
+    client_request_processing(freq_dict, cache, conn, max_len=10)
     conn.close()

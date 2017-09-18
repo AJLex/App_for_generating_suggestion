@@ -5,3 +5,4 @@ __init__.py
 input.txt
 .cache/
 /test/__pycache__
+test_input.txt
