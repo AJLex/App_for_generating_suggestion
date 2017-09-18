@@ -51,18 +51,17 @@ class SuggestionGenerator():
         self.cache = defaultdict(list)
         for word, freq in dictionary:
             if len(word) > 1:
-                # "-freq" is necessary for correct sort
-                # first by freq in descending order then by lexicographical order
-                self.shards[word[0]][word[1:2]][word] = -freq
-            self.cache[word[0]].append((word, -freq))
+                self.shards[word[0]][word[1:2]][word] = freq
+            self.cache[word[0]].append((word, freq))
         for single_letter_word, word_info in self.cache.items():
-            word_info.sort(key=lambda word_info: (word_info[1], word_info[0]))
+            # sort first by freq in descending order then by lexicographical order
+            word_info.sort(key=lambda word_info: (-word_info[1], word_info[0]))
             self.cache[single_letter_word] = word_info[:max_len]
         top_overall = []
         for single_letter_word, word_info in self.cache.items():
             top_overall.extend(word_info)
-        top_overall.sort(key=lambda word_info: (word_info[1], word_info[0]))
-        self.cache[''] = top_overall[:10]
+        top_overall.sort(key=lambda word_info: (-word_info[1], word_info[0]))
+        self.cache[''] = top_overall[:max_len]
 
     def generate_suggestions(self, prefix, max_len=10):
         # there is no need to seek if prefix already in dict
@@ -75,7 +74,7 @@ class SuggestionGenerator():
         for word, freq in self.shards[prefix[:1]][prefix[1:2]].items():
             if word.startswith(prefix):
                 suggestions.append((word, freq))
-        suggestions.sort(key=lambda word_info: (word_info[1], word_info[0]))
+        suggestions.sort(key=lambda word_info: (-word_info[1], word_info[0]))
         self.cache[prefix] = suggestions[:max_len]
         return self.cache[prefix]
 

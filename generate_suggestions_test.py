@@ -13,15 +13,15 @@ def test_generate_suggestions():
                   ('kare', 20), ('kanojo', 20), ('korosu', 7)]
     test_suggestions_generator = SuggestionGenerator(dictionary)
     assert test_suggestions_generator.generate_suggestions('k') == [
-        ('k', -50), ('kanojo', -20),
-        ('kare', -20), ('korosu', -7)]
+        ('k', 50), ('kanojo', 20),
+        ('kare', 20), ('korosu', 7)]
     # test when prefix not a single letter
     assert test_suggestions_generator.generate_suggestions('ka') == [
-        ('kanojo', -20), ('kare', -20)]
+        ('kanojo', 20), ('kare', 20)]
     # test when incoming prefixes are empty
     assert test_suggestions_generator.generate_suggestions('') == [
-        ('k', -50), ('kanojo', -20), ('kare', -20), ('b', -8), ('a', -7),
-        ('korosu', -7)]
+        ('k', 50), ('kanojo', 20), ('kare', 20), ('b', 8), ('a', 7),
+        ('korosu', 7)]
     # test when incoming dictionary are empty
     test_suggestions_generator = SuggestionGenerator([])
     assert test_suggestions_generator.generate_suggestions('a') == []

@@ -34,11 +34,11 @@ def client_request_processing(path_to_file, conn, max_len):
                 prefix = prefix[1: len(prefix) - 1]  # delet "<", ">"
                 for word_info in suggestions_generator.generate_suggestions(prefix):
                     # "end" says to client that all data was obtained
-                    conn.send(bytes(word_info[0] + 'end', encoding='utf-8'))
+                    conn.send(bytes(word_info[0] + ' ', encoding='utf-8'))
                     # server gets answer from client, when client gets all data
                     conn.recv(1024).decode('utf-8')
         except:
-            conn.send(bytes('Invalid command' + 'end', encoding='utf-8'))
+            conn.send(bytes('Invalid command' + ' ', encoding='utf-8'))
         # server sending "\n", when request processing is ending
         conn.send(bytes('\n', encoding='utf-8'))
 
@@ -49,7 +49,5 @@ if __name__ == "__main__":
     sock = setup_server(port)
     conn, addr = sock.accept()  # waiting for client connection
     # getting message from client, when he connected
-    data = conn.recv(1024).decode('utf-8')
-    print(data, 'from ', addr[0])
     client_request_processing(path_to_file, conn, max_len=10)
     conn.close()

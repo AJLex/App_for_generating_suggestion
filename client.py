@@ -7,7 +7,6 @@ def setup_connection(host, server_port):
     # connection is TCP/IPv4
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.connect((host, server_port))
-    sock.send(bytes('Client connected', encoding='utf-8'))
     return sock
 
 
@@ -24,8 +23,8 @@ def get_data_from_server(sock):
         while True:
             word = sock.recv(2048).decode('utf-8')
             # server sends "word + end", "end" - means that all message was sended
-            if word[-3:] == 'end':
-                print(word[:-3])
+            if word[-1] == ' ':
+                print(word[:-1])
                 # client sends message to serve, when gets all data
                 sock.send(bytes('ok', encoding='utf-8'))
             if word == "\n":  # data flow ended when server send "\n"
