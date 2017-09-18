@@ -18,6 +18,12 @@ for run client needs input hostname or IP and port, for example:
 path_to_program\python client.py localhost 5000
 ```
 
+for run test needs to install pytest
+```bash
+pip install -U pytest
+path_to_file\pytest
+```
+
 App consist of two part.
 
 First part is a generate_suggestions.py. This is console program, which print

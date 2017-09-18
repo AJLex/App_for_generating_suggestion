@@ -5,15 +5,15 @@ from collections import defaultdict
 # and returns dictionary and list of prefixes
 def get_input_data_from_file(path_to_file):
     raw_data = []
-    dictionary =[]
+    dictionary = []
     with open(path_to_file, 'r', encoding='utf-8') as f:
             for line in f:
                 items = line.strip().split()
                 if len(items) > 1:
                     dictionary.append((items[0], int(items[1])))
                 else:
-                    raw_data.append(items[0])    
-    prefixes = raw_data[2:]
+                    raw_data.append(items[0])
+                prefixes = raw_data[2:]
     return dictionary, prefixes
 
 
@@ -46,7 +46,6 @@ def get_input_data():
 
 
 class SuggestionGenerator():
-    """docstring for ."""
     def __init__(self, dictionary, max_len=10):
         self.shards = defaultdict(lambda: defaultdict(dict))
         self.cache = defaultdict(list)
@@ -59,7 +58,6 @@ class SuggestionGenerator():
         for single_word, word_info in self.cache.items():
             word_info.sort(key=lambda word_info: (word_info[1], word_info[0]))
             self.cache[single_word] = word_info[:max_len]
-
 
     def generate_suggestions(self, prefix, max_len=10):
         # there is no need to seek if prefix already in dict

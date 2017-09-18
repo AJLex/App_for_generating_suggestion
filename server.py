@@ -47,7 +47,7 @@ if __name__ == "__main__":
     port = int(sys.argv[1])
     path_to_file = sys.argv[2]
     sock = setup_server(port)
-    conn, addr = sock.accept()# waiting for client connection
+    conn, addr = sock.accept()  # waiting for client connection
     # getting message from client, when he connected
     data = conn.recv(1024).decode('utf-8')
     print(data, 'from ', addr[0])
