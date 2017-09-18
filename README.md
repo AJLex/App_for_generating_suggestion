@@ -1,7 +1,6 @@
-===============================================================================
 App consist of two part.
 Requirements is python 3.4.4 or higher
-===============================================================================
+
 
 First part is a generate_suggestions.py. This is console program, which print
 top 10(or less) most used word from frequency dictionary for each given prefixes.
@@ -20,7 +19,7 @@ path_to_program\python generate_suggestions.py < path_to_file\filename
 
 After processing of input file program print 10(or less) most used word for
 each prefixes, spaced by "\n"
-===============================================================================
+
 
 Second part is a client/server interaction.
 After connection client to server, client sending command containing prefix,
@@ -41,4 +40,3 @@ for entering prefix. For close connection client can enter "exit".
 
 For run client needs input hostname or IP and hort, for example:
 path_to_program\python client.py localhost 5000
-===============================================================================
